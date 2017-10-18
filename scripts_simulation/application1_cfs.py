@@ -6,6 +6,7 @@ import pickle
 cl.set_log_level(40) 
 
 
+# input biom table and mapping file
 cfs = cl.read_amplicon('../data/cfs.biom','../data/cfs.map.txt', sparse=False, normalize=10000, min_reads=1000)
 
 filtlev = [0,1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,200,300,400,500]
@@ -25,7 +26,10 @@ for i in filtlev:
     sig_bh = []
     sig_fbh = []
     for j in range(B):
+        # filter away low abundant taxa
         cfs_sub = cfs.filter_min_abundance(i)
+
+        # apply FDR methods
         ds_cfs = cfs_sub.diff_abundance('Subject','Control','Patient', fdr_method='dsfdr')
         bh_cfs = cfs_sub.diff_abundance('Subject','Control','Patient', fdr_method='bhfdr')
         fbh_cfs = cfs_sub.diff_abundance('Subject','Control','Patient', fdr_method='filterBH')

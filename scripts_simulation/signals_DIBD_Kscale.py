@@ -7,6 +7,8 @@ from biom import load_table
 from gneiss.util import match
 import pickle
 
+
+# input biom table
 def convert_biom_to_pandas(table):
     otu_table = pd.DataFrame(np.array(table.matrix_data.todense()).T,
                              index=table.ids(axis='sample'),
@@ -16,8 +18,13 @@ def convert_biom_to_pandas(table):
 table = load_table('../data/dibd.biom')
 otu_table = convert_biom_to_pandas(table)
 
+# input mapping file
 mapping = pd.read_table("../data/dibd.map.txt", sep='\t', header=0, index_col=0)
+
+# choose interested group for comparison
 mapping = mapping.loc[mapping['disease_stat'].isin (['IBD','healthy'])]
+
+# match mapping file with biom table
 mapping, otu_table = match(mapping, otu_table)
 
 labels = np.array((mapping['disease_stat'] == 'IBD').astype(int))
@@ -47,6 +54,7 @@ def round_even(f):
     f = np.ceil(f / 2.) * 2 
     return(np.int(f))
 
+# simulation parameters
 diff = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 filtlev = 10
 B = 5000

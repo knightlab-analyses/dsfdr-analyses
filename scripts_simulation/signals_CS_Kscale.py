@@ -7,44 +7,27 @@ from gneiss.util import match
 from scipy.stats import sem
 import pickle
 
-
-# In[27]:
-
+# input biom table
 def convert_biom_to_pandas(table):
     otu_table = pd.DataFrame(np.array(table.matrix_data.todense()).T,
                              index=table.ids(axis='sample'),
                              columns=table.ids(axis='observation'))
     return otu_table
 
-
-# In[28]:
-
 table = load_table('../data/cs.biom')
 otu_table = convert_biom_to_pandas(table)
 
 
-# In[5]:
-
+# input mapping file
 mapping = pd.read_table("../data/cs.map.txt", sep='\t', header=0, index_col=0)
 
-
-# In[6]:
-
+# choose interested group for comparison
 mapping = mapping.loc[mapping['smoker'].isin ([False, True])]
 
 
-# In[7]:
-
+# match mapping file with biom table
 mapping, otu_table = match(mapping, otu_table)
-
-
-# In[10]:
-
 labels = np.array((mapping['smoker'] == False).astype(int))
-
-
-# In[12]:
-
 dat = np.transpose(np.array(otu_table))
 
 # normalization
@@ -71,6 +54,7 @@ def round_even(f):
     f = np.ceil(f / 2.) * 2 
     return(np.int(f))
 
+# simulation parameters
 diff = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 filtlev = 10
 B = 5000

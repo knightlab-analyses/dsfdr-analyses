@@ -7,6 +7,7 @@ from biom import load_table
 from gneiss.util import match
 import pickle
 
+# input biom table
 def convert_biom_to_pandas(table):
     otu_table = pd.DataFrame(np.array(table.matrix_data.todense()).T,
                              index=table.ids(axis='sample'),
@@ -16,10 +17,14 @@ def convert_biom_to_pandas(table):
 table = load_table('../data/dibd.biom')
 otu_table = convert_biom_to_pandas(table)
 
+# input mapping file
 mapping = pd.read_table("../data/dibd.map.txt", sep='\t', header=0, index_col=0)
-mapping = mapping.loc[mapping['disease_stat'].isin (['IBD','healthy'])]
-mapping, otu_table = match(mapping, otu_table)
 
+# choose interested groups for comparison
+mapping = mapping.loc[mapping['disease_stat'].isin (['IBD','healthy'])]
+
+# match biom table with mapping file
+mapping, otu_table = match(mapping, otu_table)
 labels = np.array((mapping['disease_stat'] == 'IBD').astype(int))
 dat = np.transpose(np.array(otu_table))
 
@@ -28,6 +33,7 @@ sample_reads = np.sum(dat, axis=0) # colSum: total reads in each sample
 norm_length = 10000
 dat_norm = dat/sample_reads*norm_length
 
+# calculate FWER (=FDR in this scenario)
 def fwer(rej):
     if np.sum(rej) >= 1:
         r = 1
@@ -42,6 +48,7 @@ def filtering_sum(data, filterLev):
     table = data[keep==True, :]
     return(table)
 
+# simulation parameters
 sample_range = [10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90]
 B = 100000
 filtlev = 1000
@@ -80,9 +87,6 @@ for nSample in sample_range:
         healthy = sim[:, labels_sim==0]
         sick = sim[:, labels_sim==1]
         dat_sim = np.hstack((healthy, sick))
-        
-        # filtering    
-        #dat_sim = filtering_sum(dat_sim, filterLev=filtlev)
         
         # apply FDR methods
         rej_bh = dsfdr.dsfdr(dat_sim, labels_sim, transform_type = 'rankdata', method = 'meandiff',

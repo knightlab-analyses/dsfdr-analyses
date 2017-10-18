@@ -8,43 +8,28 @@ from scipy.stats import sem
 import pickle
 
 
-# In[27]:
-
+# input biom table
 def convert_biom_to_pandas(table):
     otu_table = pd.DataFrame(np.array(table.matrix_data.todense()).T,
                              index=table.ids(axis='sample'),
                              columns=table.ids(axis='observation'))
     return otu_table
 
-
-# In[28]:
-
 table = load_table('../data/cs.biom')
 otu_table = convert_biom_to_pandas(table)
 
 
-# In[5]:
-
+# input mapping file
 mapping = pd.read_table("../data/cs.map.txt", sep='\t', header=0, index_col=0)
 
 
-# In[6]:
-
+# choose interested group for comparison
 mapping = mapping.loc[mapping['smoker'].isin([False, True])]
 
 
-# In[7]:
-
+# match mapping file with biom table
 mapping, otu_table = match(mapping, otu_table)
-
-
-# In[10]:
-
 labels = np.array((mapping['smoker'] == False).astype(int))
-
-
-# In[12]:
-
 dat = np.transpose(np.array(otu_table))
 
 # normalization
@@ -72,6 +57,7 @@ labels_large = np.array(reads >= np.median(reads))
 labels_small = np.array(reads < np.median(reads))
 same_sorted = np.vstack((same[labels_large, :], same[labels_small, :]))
 
+# simulation parameters
 sample_range = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90]
 B = 1000
 filtlev = 10
@@ -193,21 +179,6 @@ for nSample in sample_range:
             fdr_gb1.append(v_gb1/r_gb1)
         pwr_gb1.append(np.sum(np.where(rej_gb1[0])[0]<p1)/p1)
         otu_gb1.append(np.sum(np.where(rej_gb1[0])[0]<p1))
-
-    #print('FDR...: %s' %(nSample))   
-
-    # convert nan to zeros
-    # fdr_bh1 = np.nan_to_num(fdr_bh1)
-    # fdr_fbh1 = np.nan_to_num(fdr_fbh1)
-    # fdr_ds1 = np.nan_to_num(fdr_ds1)
-
-    # pwr_bh1 = np.nan_to_num(pwr_bh1)
-    # pwr_fbh1 = np.nan_to_num(pwr_fbh1)
-    # pwr_ds1 = np.nan_to_num(pwr_ds1)
-
-    # otu_bh1 = np.nan_to_num(otu_bh1)
-    # otu_fbh1 = np.nan_to_num(otu_fbh1)
-    # otu_ds1 = np.nan_to_num(otu_ds1)
 
     FDR_bh1.append(np.nanmean(fdr_bh1))
     FDR_fbh1.append(np.nanmean(fdr_fbh1))

@@ -14,8 +14,8 @@ import dsfdr
 # setting: 100 truly differential taxa, 100 truly similar taxa, sample size to be 50 in each group
 # varying rare taxa from 500 to 10000 to create different discreteness
 
+# simulation parameters
 np.random.seed(31)
-
 B = 100
 d = [500, 1000, 2000, 4000, 6000, 8000, 10000]
 
@@ -66,7 +66,10 @@ for j in d:
     pwr_gb2 = []
 
     for i in range(B):
+        # simulated data
         data2,labels2 = simulation.simulatedat2(numsamples = 50, numdiff=100, numc =100, numd=j)
+
+        # apply FDR methods
         rej_bh2 = dsfdr.dsfdr(data2, labels2, transform_type = 'rankdata', method = 'meandiff',
                              alpha=0.1, numperm=1000, fdr_method ='bhfdr')
         rej_fbh2 = dsfdr.dsfdr(data2, labels2, transform_type = 'rankdata', method = 'meandiff',

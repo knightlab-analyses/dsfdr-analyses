@@ -7,6 +7,8 @@ from biom import load_table
 from gneiss.util import match
 import pickle
 
+
+# input biom table
 def convert_biom_to_pandas(table):
     otu_table = pd.DataFrame(np.array(table.matrix_data.todense()).T,
                              index=table.ids(axis='sample'),
@@ -16,8 +18,13 @@ def convert_biom_to_pandas(table):
 table = load_table('../data/dibd.biom')
 otu_table = convert_biom_to_pandas(table)
 
+# input mapping file
 mapping = pd.read_table("../data/dibd.map.txt", sep='\t', header=0, index_col=0)
+
+# choose interested group for comparison
 mapping = mapping.loc[mapping['disease_stat'].isin (['IBD','healthy'])]
+
+# match mapping file with biom table
 mapping, otu_table = match(mapping, otu_table)
 
 labels = np.array((mapping['disease_stat'] == 'IBD').astype(int))
@@ -48,7 +55,7 @@ labels_large = np.array(reads >= np.median(reads))
 labels_small = np.array(reads < np.median(reads))
 same_sorted = np.vstack((same[labels_large, :], same[labels_small, :]))
 
-
+# simulation parameters
 filtlev = [0, 2, 4, 6, 8, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 100]
 B = 2000
 nSample = 15
@@ -177,21 +184,6 @@ for f in filtlev:
             fdr_gb1.append(v_gb1/r_gb1)
         pwr_gb1.append(np.sum(np.where(rej_gb1[0])[0]<p1)/p1)
         otu_gb1.append(np.sum(np.where(rej_gb1[0])[0]<p1))
-
-    #print('FDR...: %s' %(f))   
-
-    # convert nan to zeros
-    # fdr_bh1 = np.nan_to_num(fdr_bh1)
-    # fdr_fbh1 = np.nan_to_num(fdr_fbh1)
-    # fdr_ds1 = np.nan_to_num(fdr_ds1)
-
-    # pwr_bh1 = np.nan_to_num(pwr_bh1)
-    # pwr_fbh1 = np.nan_to_num(pwr_fbh1)
-    # pwr_ds1 = np.nan_to_num(pwr_ds1)
-
-    # otu_bh1 = np.nan_to_num(otu_bh1)
-    # otu_fbh1 = np.nan_to_num(otu_fbh1)
-    # otu_ds1 = np.nan_to_num(otu_ds1)
 
     num_nulls.append(np.mean(num_bact))
 
